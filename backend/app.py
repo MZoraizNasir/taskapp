@@ -10,10 +10,10 @@ CORS(app)  # Allow React frontend to connect without CORS errors
 
 # Connect to your PostgreSQL database
 conn = psycopg2.connect(
-    host="localhost",
-    database="taskapp",   
-    user="postgres",    
-    password="admin" 
+    host=os.getenv("DB_HOST", "localhost"),
+    database=os.getenv("DB_NAME", "taskapp"),
+    user=os.getenv("DB_USER", "postgres"),
+    password=os.getenv("DB_PASSWORD", "admin")
 )
 
 # Create a cursor object to execute SQL queries
