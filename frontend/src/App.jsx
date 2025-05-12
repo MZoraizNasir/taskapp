@@ -28,27 +28,31 @@ function App() {
 
   // Handle submitting the form to add a new task
   const handleSubmit = async (e) => {
-    e.preventDefault(); // Stop page from refreshing
+  e.preventDefault(); // Prevent page refresh
 
-    const newTask = {
-      description,
-      assignedTo,
-      progress,
-    };
-
-    try {
-      // Send the new task to Flask backend
-      await axios.post('http://127.0.0.1:5000/tasks', newTask);
-      fetchTasks(); // Refresh the task list after adding
-      // Clear the form fields
-      setDescription('');
-      setAssignedTo('');
-      setProgress('In Progress');
-    } catch (error) {
-      console.error('Error adding task:', error);
-    }
+  const newTask = {
+    id: tasks.length + 1, // Generate a temporary ID
+    description,
+    assigned_to: assignedTo,
+    progress,
   };
 
+  try {
+    // Attempt to send the new task to the backend
+    await axios.post('http://127.0.0.1:5000/tasks', newTask);
+    fetchTasks(); // Refresh the task list after adding
+  } catch (error) {
+    console.error('Error adding task to backend:', error);
+
+    // If backend is not reachable, add the task to the global list
+    setTasks((prevTasks) => [...prevTasks, newTask]);
+  }
+
+  // Clear the form fields
+  setDescription('');
+  setAssignedTo('');
+  setProgress('In Progress');
+};
   // Handle changing progress locally (only in React state)
   const handleLocalProgressChange = (taskId, newProgress) => {
     const updatedTasks = tasks.map((task) => {

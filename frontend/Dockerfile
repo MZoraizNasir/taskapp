@@ -1,26 +1,30 @@
-# ─── Stage 1: Builder ─────────────────────────────────────────────────────
-FROM node:20-alpine AS builder
+# ─── Stage 1: Build React App ───────────────────────────────────
+FROM registry.access.redhat.com/ubi8/nodejs-20 AS builder
 
-# Set working directory
 WORKDIR /app
 
-# Copy package.json & lockfile, install deps
+# Switch to root to allow writing to node_modules
+USER root
+
+# Install dependencies
 COPY package*.json ./
 RUN npm install
 
-# Copy rest of the source code, build the app
+# Copy rest of the code and build the app
 COPY . .
 RUN npm run build
 
-# ─── Stage 2: Production image ───────────────────────────────────────────
-FROM nginx:alpine
+# ─── Stage 2: Serve with UBI Nginx ──────────────────────────────
+FROM registry.access.redhat.com/ubi8/nginx-120
 
-# Copy built static files from builder
-COPY --from=builder /app/dist /usr/share/nginx/html
+# Copy the built React app to Nginx root directory
+COPY --from=builder /app/dist /opt/app-root/src
 
+# Run as non-root for security
+USER 1001
 
-# Expose port 80
-EXPOSE 80
+# Expose default Nginx port
+EXPOSE 8080
 
-# Start nginx in foreground
+# Start Nginx in the foreground
 CMD ["nginx", "-g", "daemon off;"]
