@@ -75,4 +75,7 @@ def delete_task(task_id):
 
 # Run the app
 if __name__ == '__main__':
-    app.run(debug=True)
+   # Use environment variable for port, default to 5000
+    port = int(os.getenv("APP_PORT", 5000))
+    # Bind to 0.0.0.0 to be accessible externally, disable debug for production
+    app.run(host='0.0.0.0', port=port, debug=False)
